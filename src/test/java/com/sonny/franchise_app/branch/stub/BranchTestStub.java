@@ -6,6 +6,15 @@ import com.sonny.franchise_app.franchise.request.AddBranchRequest;
 
 public class BranchTestStub {
 
+    public static Branch of(Long id, String name,
+                            Long franchiseId) {
+        return Branch.builder()
+                .id(id)
+                .name(name)
+                .franchiseId(franchiseId)
+                .build();
+    }
+
     public static AddBranchRequest getDefaultBranchRequest() {
 
         Long branchId = 1L;

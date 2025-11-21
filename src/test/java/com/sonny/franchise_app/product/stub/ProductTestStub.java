@@ -6,6 +6,16 @@ import com.sonny.franchise_app.product.entity.Product;
 
 public class ProductTestStub {
 
+    public static Product of(Long id, String name,
+                             Long branchId, int stock) {
+        return Product.builder()
+                .id(id)
+                .name(name)
+                .branchId(branchId)
+                .stock(stock)
+                .build();
+    }
+
     public static AddProductRequest getDefaultProductRequest() {
 
         Long productId = 1L;

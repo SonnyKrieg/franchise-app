@@ -10,6 +10,13 @@ import java.util.HashSet;
 public class FranchiseTestStub {
 
 
+    public static Franchise of(Long id, String name) {
+        return Franchise.builder()
+                .id(id)
+                .name(name)
+                .build();
+    }
+
     public static Franchise getDefaultFranchise() {
 
         Long franchiseId = 1L;

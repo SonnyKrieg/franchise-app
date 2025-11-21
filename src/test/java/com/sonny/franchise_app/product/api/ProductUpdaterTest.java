@@ -4,6 +4,7 @@ import com.sonny.franchise_app.product.dto.ProductDto;
 import com.sonny.franchise_app.product.entity.Product;
 import com.sonny.franchise_app.product.exception.ProductNotFoundException;
 import com.sonny.franchise_app.product.repository.ProductRepository;
+import com.sonny.franchise_app.product.request.UpdateStockRequest;
 import com.sonny.franchise_app.product.stub.ProductTestStub;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,14 +31,15 @@ public class ProductUpdaterTest {
     void whenUpdateStockWithProductExistsThenUpdateAndReturnDto() {
 
         Long id = 1L;
-        int newStock = 50;
+
+        UpdateStockRequest request = new UpdateStockRequest(20);
 
         Product existingProduct = ProductTestStub.getDefaultProduct();
         Product updatedProduct = ProductTestStub.
-                getProductWithIdAndStock(existingProduct.getId(), newStock);
+                getProductWithIdAndStock(existingProduct.getId(), request.getNewStock());
 
         ProductDto updatedDto = ProductTestStub.getProductDto();
-        updatedDto.setStock(newStock);
+        updatedDto.setStock(request.getNewStock());
 
 
         when(productRepository.findById(id))
@@ -46,24 +48,25 @@ public class ProductUpdaterTest {
         when(productRepository.save(existingProduct))
                 .thenReturn(Mono.just(updatedProduct));
 
-        Mono<ProductDto> result = productUpdater.updateStock(id, newStock);
+        Mono<ProductDto> result = productUpdater.updateStock(id, request);
 
         StepVerifier.create(result)
                 .expectNextMatches(dto ->
                         dto.getId().equals(id) &&
-                                dto.getStock() == newStock)
+                                dto.getStock() == request.getNewStock())
                 .verifyComplete();
     }
 
     @Test
     void whenUpdateStockWithProductNotFoundThenThrowException() {
         Long id = 99L;
-        int newStock = 20;
+
+        UpdateStockRequest request = new UpdateStockRequest(20);
 
         when(productRepository.findById(id))
                 .thenReturn(Mono.empty());
 
-        Mono<ProductDto> result = productUpdater.updateStock(id, newStock);
+        Mono<ProductDto> result = productUpdater.updateStock(id, request);
 
         StepVerifier.create(result)
                 .expectError(ProductNotFoundException.class)

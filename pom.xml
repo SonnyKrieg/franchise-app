@@ -104,6 +104,12 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<image>
+						<name>${env.REGISTRY}/${env.IMAGE_NAME}:${env.VERSION}</name>
+						<env>
+							<BP_JVM_VERSION>21.*</BP_JVM_VERSION>
+						</env>
+					</image>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

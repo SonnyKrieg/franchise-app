@@ -4,6 +4,7 @@ import com.sonny.franchise_app.branch.entity.Branch;
 import com.sonny.franchise_app.branch.repository.BranchRepository;
 import com.sonny.franchise_app.franchise.dto.MaxStockProductDto;
 import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
+import com.sonny.franchise_app.franchise.exception.FranchiseWithZeroBranchesException;
 import com.sonny.franchise_app.franchise.repository.FranchiseRepository;
 import com.sonny.franchise_app.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
@@ -23,23 +24,19 @@ public class MaxStockProductsProvider {
     private final ProductRepository productRepository;
 
     public Flux<MaxStockProductDto> get(Long franchiseId) {
+
         return franchiseRepository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new FranchiseNotFoundException(franchiseId)))
                 .flatMapMany(franchise ->
-                                // Obtener todas las branches de la franquicia
-                                branchRepository.findByFranchiseId(franchiseId)
-                                        // PARALELISMO: Procesar cada branch en paralelo
-                                        .flatMap(branch ->
-                                                getMaxStockProductByBranch(branch)
-                                                        .subscribeOn(Schedulers.parallel())
-                                        )
-                        // Mantener el orden si es necesario (opcional)
-                        // .parallel()
-                        // .runOn(Schedulers.parallel())
-                        // .sequential()
-                )
-                .switchIfEmpty(Flux.error(
-                        new FranchiseNotFoundException(franchiseId)
-                ));
+                        branchRepository.findByFranchiseId(franchiseId)
+                                .switchIfEmpty(Flux.error(
+                                        new FranchiseWithZeroBranchesException(franchiseId)
+                                ))
+                                .flatMap(branch ->
+                                        getMaxStockProductByBranch(branch)
+                                                .subscribeOn(Schedulers.parallel())
+                                )
+                );
     }
 
     private Mono<MaxStockProductDto> getMaxStockProductByBranch(Branch branch) {

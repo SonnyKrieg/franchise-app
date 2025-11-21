@@ -3,7 +3,9 @@ package com.sonny.franchise_app.franchise.endpoint;
 import com.sonny.franchise_app.branch.dto.BranchDto;
 import com.sonny.franchise_app.franchise.api.AddBranchToFranchiseHelper;
 import com.sonny.franchise_app.franchise.api.FranchiseCreator;
+import com.sonny.franchise_app.franchise.api.MaxStockProductsProvider;
 import com.sonny.franchise_app.franchise.dto.FranchiseDto;
+import com.sonny.franchise_app.franchise.dto.MaxStockProductDto;
 import com.sonny.franchise_app.franchise.request.AddBranchRequest;
 import com.sonny.franchise_app.franchise.request.CreateFranchiseRequest;
 import jakarta.validation.Valid;
@@ -12,10 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -28,6 +28,7 @@ public class FranchiseEndpoint {
 
     private final FranchiseCreator franchiseCreator;
     private final AddBranchToFranchiseHelper branchToFranchiseHelper;
+    private final MaxStockProductsProvider maxStockProvider;
 
     @PostMapping
     public Mono<ResponseEntity<FranchiseDto>> createFranchise(@Valid @RequestBody Mono<CreateFranchiseRequest> requestMono) {
@@ -69,5 +70,15 @@ public class FranchiseEndpoint {
                             ResponseEntity.status(HttpStatus.CREATED).body(branchDto)
                     );
         });
+    }
+
+    @GetMapping("/{id}/max-stock")
+    public Flux<MaxStockProductDto> getMaxStockProducts(@PathVariable Long id) {
+
+        log.info("Obteniendo los productos con mayor stock por sucursal para la franquicia {}", id);
+
+        return maxStockProvider.get(id)
+                .doOnComplete(() ->
+                        log.info("Consulta completada para franquicia {}", id));
     }
 }

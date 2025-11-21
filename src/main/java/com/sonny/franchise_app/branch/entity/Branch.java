@@ -1,20 +1,25 @@
-package com.sonny.franchise_app.franchise.entity;
+package com.sonny.franchise_app.branch.entity;
 
-import com.sonny.franchise_app.branch.entity.Branch;
+import lombok.*;
 import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.Set;
 
-public class Franchise {
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "branch")
+public class Branch {
 
     @Id
     private Long id;
 
     private String name;
 
-    @Transient
-    private Set<Branch> branches;
+    private Long franchiseId;
 
     @CreatedDate
     private Instant createdAt;
@@ -24,5 +29,4 @@ public class Franchise {
 
     @Version
     private int version;
-
 }

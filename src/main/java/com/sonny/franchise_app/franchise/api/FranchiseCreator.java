@@ -1,5 +1,7 @@
 package com.sonny.franchise_app.franchise.api;
 
+import com.sonny.franchise_app.franchise.dto.FranchiseDto;
+import com.sonny.franchise_app.franchise.repository.FranchiseRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,10 @@
 package com.sonny.franchise_app.franchise.endpoint;
 
+import com.sonny.franchise_app.branch.dto.BranchDto;
+import com.sonny.franchise_app.franchise.api.AddBranchToFranchiseHelper;
 import com.sonny.franchise_app.franchise.api.FranchiseCreator;
 import com.sonny.franchise_app.franchise.dto.FranchiseDto;
+import com.sonny.franchise_app.franchise.request.AddBranchRequest;
 import com.sonny.franchise_app.franchise.request.CreateFranchiseRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class FranchiseEndpoint {
     public static final String FRANCHISE_URL = "/api/v1/franchise";
 
     private final FranchiseCreator franchiseCreator;
+    private final AddBranchToFranchiseHelper branchToFranchiseHelper;
 
     @PostMapping
     public Mono<ResponseEntity<FranchiseDto>> createFranchise(@Valid @RequestBody Mono<CreateFranchiseRequest> requestMono) {
@@ -46,4 +50,24 @@ public class FranchiseEndpoint {
         });
     }
 
+    @PostMapping("/branch/add")
+    public Mono<ResponseEntity<BranchDto>> addBranch(@Valid @RequestBody Mono<AddBranchRequest> requestMono) {
+        return requestMono.flatMap(request -> {
+
+            if (request.getName() == null || request.getFranchiseId() == null) {
+                log.warn("Solicitud de creación de sucursal invalida");
+                return Mono.just(ResponseEntity.badRequest().build());
+            }
+
+            log.info("Creando la sucursal con nombre {}", request.getName());
+
+            return branchToFranchiseHelper.addNewBranchToFranchise(request)
+                    .doOnNext(branchDto ->
+                            log.info("La sucursal con nombre {} se creó correctamente", branchDto.getName())
+                    )
+                    .map(branchDto ->
+                            ResponseEntity.status(HttpStatus.CREATED).body(branchDto)
+                    );
+        });
+    }
 }

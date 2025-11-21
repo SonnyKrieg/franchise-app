@@ -33,9 +33,20 @@ public class ProductTestStub {
 
         return Product.builder()
                 .id(productId)
-                .name("product 1").
-                branchId(1L)
+                .name("product 1")
+                .branchId(1L)
                 .stock(11)
+                .build();
+    }
+
+    public static Product getProductWithIdAndStock(Long productId,
+                                                   int stock) {
+
+        return Product.builder()
+                .id(productId)
+                .name("product 1")
+                .branchId(1L)
+                .stock(stock)
                 .build();
     }
 

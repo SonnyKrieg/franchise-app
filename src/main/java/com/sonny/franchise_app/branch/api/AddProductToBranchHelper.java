@@ -27,12 +27,12 @@ public class AddProductToBranchHelper {
                 .flatMap(existsBranch -> {
                     if (!existsBranch)
                         return Mono.error(new BranchNotFoundException(request.getBranchId()));
-                    return productRepository.existsByName(request.getName());
+                    return productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId());
                 })
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(
-                                new ProductDuplicateNameException(request.getName()));
+                                new ProductDuplicateNameException(request.getBranchId(), request.getName()));
                     }
 
                     Product product = Product.builder()

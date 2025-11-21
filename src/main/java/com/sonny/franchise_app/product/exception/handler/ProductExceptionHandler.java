@@ -1,8 +1,8 @@
 package com.sonny.franchise_app.product.exception.handler;
 
-import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
 import com.sonny.franchise_app.franchise.utils.ErrorResponse;
 import com.sonny.franchise_app.product.endpoint.ProductEndpoint;
+import com.sonny.franchise_app.product.exception.ProductDuplicateNameException;
 import com.sonny.franchise_app.product.exception.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,4 +28,7 @@ public class ProductExceptionHandler {
 
         return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
+
+
+
 }

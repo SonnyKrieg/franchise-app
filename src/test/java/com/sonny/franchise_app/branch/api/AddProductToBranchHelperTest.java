@@ -54,7 +54,7 @@ public class AddProductToBranchHelperTest {
         when(branchRepository.existsById(request.getBranchId()))
                 .thenReturn(Mono.just(true));
 
-        when(productRepository.existsByName(request.getName()))
+        when(productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId()))
                 .thenReturn(Mono.just(true));
 
         StepVerifier.create(helper.addNewProductToBranch(request))
@@ -75,7 +75,7 @@ public class AddProductToBranchHelperTest {
         when(branchRepository.existsById(request.getBranchId()))
                 .thenReturn(Mono.just(true));
 
-        when(productRepository.existsByName(request.getName()))
+        when(productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId()))
                 .thenReturn(Mono.just(false));
 
         when(productRepository.save(any(Product.class)))

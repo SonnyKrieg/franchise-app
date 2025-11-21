@@ -4,6 +4,7 @@ import com.sonny.franchise_app.branch.exception.BranchDuplicatedNameException;
 import com.sonny.franchise_app.franchise.endpoint.FranchiseEndpoint;
 import com.sonny.franchise_app.franchise.exception.FranchiseDuplicateNameException;
 import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
+import com.sonny.franchise_app.franchise.exception.FranchiseWithZeroBranchesException;
 import com.sonny.franchise_app.franchise.utils.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,19 @@ public class FranchiseExceptionHandler {
 
     @ExceptionHandler(BranchDuplicatedNameException.class)
     public Mono<ResponseEntity<ErrorResponse>> handleBranchDuplicatedNameException(BranchDuplicatedNameException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .messages(List.of(ex.getMessage()))
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(Instant.now().toString())
+                .error("Solicitud invalida.")
+                .build();
+
+        return Mono.just(ResponseEntity.badRequest().body(error));
+    }
+
+    @ExceptionHandler(FranchiseWithZeroBranchesException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleFranchiseWithZeroBranchesException(FranchiseWithZeroBranchesException ex) {
 
         ErrorResponse error = ErrorResponse.builder()
                 .messages(List.of(ex.getMessage()))

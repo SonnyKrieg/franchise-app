@@ -9,4 +9,5 @@ public interface FranchiseRepository extends ReactiveCrudRepository<Franchise, L
     public Mono<Boolean> existsByName(String name);
 
 
+
 }

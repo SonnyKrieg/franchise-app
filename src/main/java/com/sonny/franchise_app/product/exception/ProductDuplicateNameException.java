@@ -6,10 +6,12 @@ import lombok.Getter;
 public class ProductDuplicateNameException extends RuntimeException {
 
     private final String name;
+    private final Long branchId;
 
-    public ProductDuplicateNameException(String name) {
-        super(String.format("El nombre %s ya se encuentra registrado.", name));
+    public ProductDuplicateNameException(Long branchId, String name) {
+        super(String.format("La sucursal %s ya cuenta con un producto llamado %s.", branchId, name));
         this.name = name;
+        this.branchId = branchId;
     }
 
 }

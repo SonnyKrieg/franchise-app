@@ -26,6 +26,6 @@ public class ProductExceptionHandler {
                 .error("No se encontro.")
                 .build();
 
-        return Mono.just(ResponseEntity.badRequest().body(error));
+        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(error));
     }
 }

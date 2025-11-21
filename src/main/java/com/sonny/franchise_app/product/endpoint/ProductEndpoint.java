@@ -1,14 +1,15 @@
 package com.sonny.franchise_app.product.endpoint;
 
 import com.sonny.franchise_app.product.api.ProductDeleter;
+import com.sonny.franchise_app.product.api.ProductUpdater;
+import com.sonny.franchise_app.product.dto.ProductDto;
+import com.sonny.franchise_app.product.request.UpdateStockRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -21,6 +22,7 @@ public class ProductEndpoint {
     public static final String PRODUCT_URL = "/api/v1/product";
 
     private final ProductDeleter productDeleter;
+    private final ProductUpdater productUpdater;
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable Long id) {
@@ -29,5 +31,16 @@ public class ProductEndpoint {
 
         return productDeleter.deleteProductById(id)
                 .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @PatchMapping("/{id}/stock")
+    public Mono<ResponseEntity<ProductDto>> updateStock(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateStockRequest request) {
+
+        log.info("Actualizando el stock del producto {} a {}", id, request);
+
+        return productUpdater.updateStock(id, request)
+                .map(ResponseEntity::ok);
     }
 }

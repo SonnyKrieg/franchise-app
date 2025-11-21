@@ -1,6 +1,9 @@
 package com.sonny.franchise_app.franchise.api;
 
 import com.sonny.franchise_app.branch.dto.BranchDto;
+import com.sonny.franchise_app.branch.entity.Branch;
+import com.sonny.franchise_app.branch.exception.BranchDuplicatedNameException;
+import com.sonny.franchise_app.branch.mapper.BranchMapper;
 import com.sonny.franchise_app.branch.repository.BranchRepository;
 import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
 import com.sonny.franchise_app.franchise.repository.FranchiseRepository;

@@ -1,8 +1,10 @@
 package com.sonny.franchise_app.product.endpoint;
 
+import com.sonny.franchise_app.branch.request.UpdateBranchNameRequest;
 import com.sonny.franchise_app.product.api.ProductDeleter;
 import com.sonny.franchise_app.product.api.ProductUpdater;
 import com.sonny.franchise_app.product.dto.ProductDto;
+import com.sonny.franchise_app.product.request.UpdateProductNameRequest;
 import com.sonny.franchise_app.product.request.UpdateStockRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,17 @@ public class ProductEndpoint {
         log.info("Actualizando el stock del producto {} a {}", id, request.getNewStock());
 
         return productUpdater.updateStock(id, request)
+                .map(ResponseEntity::ok);
+    }
+
+    @PatchMapping("/{id}/name")
+    public Mono<ResponseEntity<ProductDto>> updateName(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateProductNameRequest request) {
+
+        log.info("Actualizando el nombre del producto {} a {}", id, request.getName());
+
+        return productUpdater.updateName(id, request)
                 .map(ResponseEntity::ok);
     }
 }

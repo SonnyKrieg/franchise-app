@@ -134,16 +134,6 @@ docker-compose up
 5. Pruebe la API con localhost:8080
 ---
 
-# 💻 Ejecutar en entorno local
-
-## Requisitos
-
-- Java 21
-- Maven o Gradle
-- Docker (opcional)
-- Base de datos configurada (según tu implementación)
-
-
 # ☁️ Infraestructura como Código (Plus)
 
 Se creo una plantilla con CloudFormation:

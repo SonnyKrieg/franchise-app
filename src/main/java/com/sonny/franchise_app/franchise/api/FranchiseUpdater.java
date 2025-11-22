@@ -1,13 +1,10 @@
 package com.sonny.franchise_app.franchise.api;
 
 import com.sonny.franchise_app.franchise.dto.FranchiseDto;
+import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
 import com.sonny.franchise_app.franchise.mapper.FranchiseMapper;
 import com.sonny.franchise_app.franchise.repository.FranchiseRepository;
-import com.sonny.franchise_app.franchise.request.UpdateNameRequest;
-import com.sonny.franchise_app.product.dto.ProductDto;
-import com.sonny.franchise_app.product.exception.ProductNotFoundException;
-import com.sonny.franchise_app.product.mapper.ProductMapper;
-import com.sonny.franchise_app.product.request.UpdateStockRequest;
+import com.sonny.franchise_app.franchise.request.UpdateFranchiseNameRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,10 +17,10 @@ public class FranchiseUpdater {
 
     private final FranchiseRepository franchiseRepository;
 
-    public Mono<FranchiseDto> updateName(Long id, UpdateNameRequest request) {
+    public Mono<FranchiseDto> updateName(Long id, UpdateFranchiseNameRequest request) {
 
         return franchiseRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ProductNotFoundException(id)))
+                .switchIfEmpty(Mono.error(new FranchiseNotFoundException(id)))
                 .flatMap(product -> {
                     product.setName(request.getName());
                     return franchiseRepository.save(product);

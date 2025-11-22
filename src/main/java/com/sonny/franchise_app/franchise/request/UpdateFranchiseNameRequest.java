@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UpdateNameRequest {
+public class UpdateFranchiseNameRequest {
 
     @NotBlank(message = "Debe escribir el nombre de la franquicia.")
     @Size(min = 2, max = 75, message = "El nombre debe tener entre 2 y 50 caracteres")

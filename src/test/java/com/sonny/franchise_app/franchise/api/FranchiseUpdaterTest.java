@@ -2,8 +2,9 @@ package com.sonny.franchise_app.franchise.api;
 
 import com.sonny.franchise_app.franchise.dto.FranchiseDto;
 import com.sonny.franchise_app.franchise.entity.Franchise;
+import com.sonny.franchise_app.franchise.exception.FranchiseNotFoundException;
 import com.sonny.franchise_app.franchise.repository.FranchiseRepository;
-import com.sonny.franchise_app.franchise.request.UpdateNameRequest;
+import com.sonny.franchise_app.franchise.request.UpdateFranchiseNameRequest;
 import com.sonny.franchise_app.franchise.stub.FranchiseTestStub;
 import com.sonny.franchise_app.product.exception.ProductNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class FranchiseUpdaterTest {
 
         Long id = 1L;
 
-        UpdateNameRequest request = new UpdateNameRequest("new name");
+        UpdateFranchiseNameRequest request = new UpdateFranchiseNameRequest("new name");
 
         Franchise existingFranchise = FranchiseTestStub.getFranchiseWithNameAndId(id, "be name ");
 
@@ -54,7 +55,7 @@ public class FranchiseUpdaterTest {
         StepVerifier.create(result)
                 .expectNextMatches(dto ->
                         dto.getId().equals(id) &&
-                                dto.getName() == request.getName())
+                                dto.getName().equals(request.getName()))
                 .verifyComplete();
     }
 
@@ -62,7 +63,7 @@ public class FranchiseUpdaterTest {
     void whenUpdateStockWithProductNotFoundThenThrowException() {
         Long id = 99L;
 
-        UpdateNameRequest request = new UpdateNameRequest("new name");
+        UpdateFranchiseNameRequest request = new UpdateFranchiseNameRequest("new name");
 
         when(franchiseRepository.findById(id))
                 .thenReturn(Mono.empty());
@@ -70,7 +71,7 @@ public class FranchiseUpdaterTest {
         Mono<FranchiseDto> result = franchiseUpdater.updateName(id, request);
 
         StepVerifier.create(result)
-                .expectError(ProductNotFoundException.class)
+                .expectError(FranchiseNotFoundException.class)
                 .verify();
 
         verify(franchiseRepository).findById(id);

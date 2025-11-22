@@ -15,9 +15,6 @@ public class AddProductRequest {
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", message = "El nombre solo puede contener letras y espacios")
     private String name;
 
-    @NotNull(message = "Debe escribir el Id de la sucursal.")
-    private Long branchId;
-
     @NotNull(message = "Debe escribir el stock del producto")
     @Min(value = 0, message = "El stock debe ser mayor o igual que cero")
     private int stock;

@@ -21,23 +21,23 @@ public class AddProductToBranchHelper {
     private final ProductRepository productRepository;
     private final BranchRepository branchRepository;
 
-    public Mono<ProductDto> addNewProductToBranch(AddProductRequest request) {
+    public Mono<ProductDto> addNewProductToBranch(Long branchId, AddProductRequest request) {
 
-        return branchRepository.existsById(request.getBranchId())
+        return branchRepository.existsById(branchId)
                 .flatMap(existsBranch -> {
                     if (!existsBranch)
-                        return Mono.error(new BranchNotFoundException(request.getBranchId()));
-                    return productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId());
+                        return Mono.error(new BranchNotFoundException(branchId));
+                    return productRepository.existsByNameAndBranchId(request.getName(), branchId);
                 })
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(
-                                new ProductDuplicateNameException(request.getBranchId(), request.getName()));
+                                new ProductDuplicateNameException(branchId, request.getName()));
                     }
 
                     Product product = Product.builder()
                             .name(request.getName())
-                            .branchId(request.getBranchId())
+                            .branchId(branchId)
                             .stock(request.getStock())
                             .build();
 

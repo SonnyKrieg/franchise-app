@@ -27,8 +27,10 @@ public class BranchEndpoint {
     private final AddProductToBranchHelper helper;
     private final BranchUpdater branchUpdater;
 
-    @PostMapping("/product/add")
-    public Mono<ResponseEntity<ProductDto>> addProduct(@Valid @RequestBody Mono<AddProductRequest> requestMono) {
+    @PostMapping("{id}/product/add")
+    public Mono<ResponseEntity<ProductDto>> addProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody Mono<AddProductRequest> requestMono) {
         return requestMono.flatMap(request -> {
 
             if (request.getName() == null) {
@@ -38,7 +40,7 @@ public class BranchEndpoint {
 
             log.info("Creando el producto con nombre {}", request.getName());
 
-            return helper.addNewProductToBranch(request)
+            return helper.addNewProductToBranch(id, request)
                     .doOnNext(productDto ->
                             log.info("El producto con nombre {} se creó correctamente", productDto.getName())
                     )

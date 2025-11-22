@@ -32,32 +32,35 @@ public class AddBranchToFranchiseHelperTest {
     private AddBranchToFranchiseHelper helper;
 
     @Test
-    void addNewBranchWithFranchiseNotExist() {
+    void whenAddNewBranchWithFranchiseNotExistThenThrowsException() {
 
         AddBranchRequest request = BranchTestStub.getDefaultBranchRequest();
+        Long franchiseId = 1L;
 
-        when(franchiseRepository.existsById(request.getFranchiseId()))
+        when(franchiseRepository.existsById(franchiseId))
                 .thenReturn(Mono.just(false)); //
 
-        StepVerifier.create(helper.addNewBranchToFranchise(request))
+        StepVerifier.create(helper.addNewBranchToFranchise(franchiseId, request))
                 .expectErrorMatches(error ->
                         error instanceof FranchiseNotFoundException &&
-                                error.getMessage().contains(String.valueOf(request.getFranchiseId()))
+                                error.getMessage().contains(String.valueOf(franchiseId))
                 )
                 .verify();
     }
 
     @Test
-    void addNewBranchWithBranchNameExists() {
+    void whenAddNewBranchWithBranchNameExistsThenThrowException() {
 
         AddBranchRequest request = BranchTestStub.getDefaultBranchRequest();
-        when(franchiseRepository.existsById(request.getFranchiseId()))
+        Long franchiseId = 1L;
+
+        when(franchiseRepository.existsById(franchiseId))
                 .thenReturn(Mono.just(true));
 
         when(branchRepository.existsByName(request.getName()))
                 .thenReturn(Mono.just(true));
 
-        StepVerifier.create(helper.addNewBranchToFranchise(request))
+        StepVerifier.create(helper.addNewBranchToFranchise(franchiseId, request))
                 .expectErrorMatches(error ->
                         error instanceof BranchDuplicatedNameException &&
                                 error.getMessage().contains(request.getName())
@@ -66,13 +69,14 @@ public class AddBranchToFranchiseHelperTest {
     }
 
     @Test
-    void addNewBranch_WhenValid_ShouldSaveAndReturnDto() {
+    void whenAddNewBranchWithValidThenSaveAndReturnDto() {
 
         AddBranchRequest request = BranchTestStub.getDefaultBranchRequest();
+        Long franchiseId = 1L;
 
         Branch saved = BranchTestStub.getDefaultBranch();
 
-        when(franchiseRepository.existsById(request.getFranchiseId()))
+        when(franchiseRepository.existsById(franchiseId))
                 .thenReturn(Mono.just(true));
 
         when(branchRepository.existsByName(request.getName()))
@@ -81,7 +85,7 @@ public class AddBranchToFranchiseHelperTest {
         when(branchRepository.save(any(Branch.class)))
                 .thenReturn(Mono.just(saved));
 
-        StepVerifier.create(helper.addNewBranchToFranchise(request))
+        StepVerifier.create(helper.addNewBranchToFranchise(franchiseId, request))
                 .assertNext(dto -> {
                     assertEquals(saved.getId(), dto.getId());
                     assertEquals(saved.getName(), dto.getName());

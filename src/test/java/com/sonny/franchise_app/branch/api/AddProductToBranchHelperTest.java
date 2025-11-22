@@ -35,29 +35,32 @@ public class AddProductToBranchHelperTest {
     void addNewProductWithBranchNotExist() {
 
         AddProductRequest request = ProductTestStub.getDefaultProductRequest();
+        Long branchId = 1L;
 
-        when(branchRepository.existsById(request.getBranchId()))
+        when(branchRepository.existsById(branchId))
                 .thenReturn(Mono.just(false)); //
 
-        StepVerifier.create(helper.addNewProductToBranch(request))
+        StepVerifier.create(helper.addNewProductToBranch(branchId, request))
                 .expectErrorMatches(error ->
                         error instanceof BranchNotFoundException &&
-                                error.getMessage().contains(String.valueOf(request.getBranchId()))
+                                error.getMessage().contains(String.valueOf(branchId))
                 )
                 .verify();
     }
 
     @Test
-    void addNewProductWithProductNameExists() {
+    void whenAddNewProductWithProductNameExistsThenThrowException() {
 
         AddProductRequest request = ProductTestStub.getDefaultProductRequest();
-        when(branchRepository.existsById(request.getBranchId()))
+        Long branchId = 1L;
+
+        when(branchRepository.existsById(branchId))
                 .thenReturn(Mono.just(true));
 
-        when(productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId()))
+        when(productRepository.existsByNameAndBranchId(request.getName(), branchId))
                 .thenReturn(Mono.just(true));
 
-        StepVerifier.create(helper.addNewProductToBranch(request))
+        StepVerifier.create(helper.addNewProductToBranch(branchId, request))
                 .expectErrorMatches(error ->
                         error instanceof ProductDuplicateNameException &&
                                 error.getMessage().contains(request.getName())
@@ -66,22 +69,23 @@ public class AddProductToBranchHelperTest {
     }
 
     @Test
-    void addNewProductValid() {
+    void whenAddNewProductWithoutDuplicationThenReturnDto() {
 
         AddProductRequest request = ProductTestStub.getDefaultProductRequest();
+        Long branchId = 1L;
 
         Product saved = ProductTestStub.getDefaultProduct();
 
-        when(branchRepository.existsById(request.getBranchId()))
+        when(branchRepository.existsById(branchId))
                 .thenReturn(Mono.just(true));
 
-        when(productRepository.existsByNameAndBranchId(request.getName(), request.getBranchId()))
+        when(productRepository.existsByNameAndBranchId(request.getName(), branchId))
                 .thenReturn(Mono.just(false));
 
         when(productRepository.save(any(Product.class)))
                 .thenReturn(Mono.just(saved));
 
-        StepVerifier.create(helper.addNewProductToBranch(request))
+        StepVerifier.create(helper.addNewProductToBranch(branchId, request))
                 .assertNext(dto -> {
                     assertEquals(saved.getId(), dto.getId());
                     assertEquals(saved.getName(), dto.getName());

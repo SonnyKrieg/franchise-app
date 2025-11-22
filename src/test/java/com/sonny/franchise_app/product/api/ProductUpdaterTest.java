@@ -4,6 +4,7 @@ import com.sonny.franchise_app.product.dto.ProductDto;
 import com.sonny.franchise_app.product.entity.Product;
 import com.sonny.franchise_app.product.exception.ProductNotFoundException;
 import com.sonny.franchise_app.product.repository.ProductRepository;
+import com.sonny.franchise_app.product.request.UpdateProductNameRequest;
 import com.sonny.franchise_app.product.request.UpdateStockRequest;
 import com.sonny.franchise_app.product.stub.ProductTestStub;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,57 @@ public class ProductUpdaterTest {
                 .thenReturn(Mono.empty());
 
         Mono<ProductDto> result = productUpdater.updateStock(id, request);
+
+        StepVerifier.create(result)
+                .expectError(ProductNotFoundException.class)
+                .verify();
+
+        verify(productRepository).findById(id);
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
+    void whenUpdateNameProductWithProductExistsThenUpdateAndReturnDto() {
+
+        Long id = 1L;
+
+        UpdateProductNameRequest request = new UpdateProductNameRequest("new name");
+
+        Product existingProduct = ProductTestStub.getProductWithNameAndId( "be name ", id);
+
+        Product updatedProduct = ProductTestStub.
+                getProductWithNameAndId(request.getName(), id);
+
+        ProductDto updatedDto = ProductTestStub.getProductDto();
+
+        updatedDto.setName(request.getName());
+
+
+        when(productRepository.findById(id))
+                .thenReturn(Mono.just(existingProduct));
+
+        when(productRepository.save(existingProduct))
+                .thenReturn(Mono.just(updatedProduct));
+
+        Mono<ProductDto> result = productUpdater.updateName(id, request);
+
+        StepVerifier.create(result)
+                .expectNextMatches(dto ->
+                        dto.getId().equals(id) &&
+                                dto.getName().equals(request.getName()))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenUpdateNameWithProductNotFoundThenThrowException() {
+        Long id = 99L;
+
+        UpdateProductNameRequest request = new UpdateProductNameRequest("new name");
+
+        when(productRepository.findById(id))
+                .thenReturn(Mono.empty());
+
+        Mono<ProductDto> result = productUpdater.updateName(id, request);
 
         StepVerifier.create(result)
                 .expectError(ProductNotFoundException.class)

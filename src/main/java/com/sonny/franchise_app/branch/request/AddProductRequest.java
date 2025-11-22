@@ -11,8 +11,7 @@ import lombok.Getter;
 public class AddProductRequest {
 
     @NotBlank(message = "Debe escribir el nombre de la sucursal.")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", message = "El nombre solo puede contener letras y espacios")
+    @Size(min = 2, max = 70, message = "El nombre debe tener entre 2 y 70 caracteres")
     private String name;
 
     @NotNull(message = "Debe escribir el stock del producto")

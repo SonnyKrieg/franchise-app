@@ -108,13 +108,21 @@ franchise/
 
 # Ejecutar local con docker 🐳
 
-Construir imagen:
 
 1. Clone el repositorio:
 
 ```bash
 git clone https://github.com/SonnyKrieg/franchise-app
 ```
+Pongase sobre la carpeta deployment/docker y ejecute
+
+```bash
+docker-compose up 
+```
+Pruebe la API en localhost:8080
+
+O si prefiere construir la imagen con el Dockerfile:
+
 
 2. Cree el Jar ejecutando:
 ```bash
@@ -126,7 +134,7 @@ git clone https://github.com/SonnyKrieg/franchise-app
 docker build -t franchise-app .
 ```
 
-4. Vaya a la carpeta franchise-deployment/dockere y ejecute:
+4. Vaya a la carpeta franchise-deployment/docker y coloque el nombre de la imagen en el servicio fr-app que acabó de crear y ejecute:
 
 ```bash
 docker-compose up 

@@ -27,7 +27,7 @@ public class BranchUpdaterTest {
     private BranchUpdater branchUpdater;
 
     @Test
-    void whenUpdateStockWithProductExistsThenUpdateAndReturnDto() {
+    void whenUpdateNameWithBranchExistsThenUpdateAndReturnDto() {
 
         Long id = 1L;
 
@@ -59,7 +59,7 @@ public class BranchUpdaterTest {
     }
 
     @Test
-    void whenUpdateStockWithProductNotFoundThenThrowException() {
+    void whenUpdateNameWithBranchNotFoundThenThrowException() {
         Long id = 99L;
 
         UpdateBranchNameRequest request = new UpdateBranchNameRequest("new name");

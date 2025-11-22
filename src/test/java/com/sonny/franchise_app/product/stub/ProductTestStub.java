@@ -32,7 +32,6 @@ public class ProductTestStub {
 
         return AddProductRequest.builder()
                 .name("product 1")
-                .branchId(1L)
                 .stock(11)
                 .build();
     }

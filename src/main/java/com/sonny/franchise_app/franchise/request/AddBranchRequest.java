@@ -19,6 +19,4 @@ public class AddBranchRequest {
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", message = "El nombre solo puede contener letras y espacios")
     private String name;
 
-    @NotNull(message = "Debe escribir el Id de la franquicia.")
-    private Long franchiseId;
 }

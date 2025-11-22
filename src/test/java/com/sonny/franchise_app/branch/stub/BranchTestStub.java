@@ -31,7 +31,6 @@ public class BranchTestStub {
 
         return AddBranchRequest.builder()
                 .name("ABC1 -- street 1")
-                .franchiseId(1L)
                 .build();
     }
 

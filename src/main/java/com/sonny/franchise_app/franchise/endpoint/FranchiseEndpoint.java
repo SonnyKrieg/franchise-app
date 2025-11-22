@@ -56,18 +56,20 @@ public class FranchiseEndpoint {
         });
     }
 
-    @PostMapping("/branch/add")
-    public Mono<ResponseEntity<BranchDto>> addBranch(@Valid @RequestBody Mono<AddBranchRequest> requestMono) {
+    @PostMapping("/{id}/branch/add")
+    public Mono<ResponseEntity<BranchDto>> addBranch(
+            @PathVariable Long id,
+            @Valid @RequestBody Mono<AddBranchRequest> requestMono) {
         return requestMono.flatMap(request -> {
 
-            if (request.getName() == null || request.getFranchiseId() == null) {
+            if (request.getName() == null || id == null) {
                 log.warn("Solicitud de creación de sucursal invalida");
                 return Mono.just(ResponseEntity.badRequest().build());
             }
 
             log.info("Creando la sucursal con nombre {}", request.getName());
 
-            return branchToFranchiseHelper.addNewBranchToFranchise(request)
+            return branchToFranchiseHelper.addNewBranchToFranchise(id, request)
                     .doOnNext(branchDto ->
                             log.info("La sucursal con nombre {} se creó correctamente", branchDto.getName())
                     )

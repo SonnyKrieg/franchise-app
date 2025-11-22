@@ -28,7 +28,7 @@ public class FranchiseUpdaterTest {
     private FranchiseUpdater franchiseUpdater;
 
     @Test
-    void whenUpdateStockWithProductExistsThenUpdateAndReturnDto() {
+    void whenUpdateNameWithFranchiseExistsThenUpdateAndReturnDto() {
 
         Long id = 1L;
 
@@ -60,7 +60,7 @@ public class FranchiseUpdaterTest {
     }
 
     @Test
-    void whenUpdateStockWithProductNotFoundThenThrowException() {
+    void whenUpdateNameWithFranchiseNotFoundThenThrowException() {
         Long id = 99L;
 
         UpdateFranchiseNameRequest request = new UpdateFranchiseNameRequest("new name");

@@ -22,12 +22,12 @@ public class AddBranchToFranchiseHelper {
     private final FranchiseRepository franchiseRepository;
     private final BranchRepository branchRepository;
 
-    public Mono<BranchDto> addNewBranchToFranchise(AddBranchRequest request) {
+    public Mono<BranchDto> addNewBranchToFranchise(Long franchiseId, AddBranchRequest request) {
 
-        return franchiseRepository.existsById(request.getFranchiseId())
+        return franchiseRepository.existsById(franchiseId)
                 .flatMap(existsFranchise -> {
                     if (!existsFranchise)
-                        return Mono.error(new FranchiseNotFoundException(request.getFranchiseId()));
+                        return Mono.error(new FranchiseNotFoundException(franchiseId));
                     return branchRepository.existsByName(request.getName());
                 })
                 .flatMap(exists -> {
@@ -38,7 +38,7 @@ public class AddBranchToFranchiseHelper {
 
                     Branch branch = Branch.builder()
                             .name(request.getName())
-                            .franchiseId(request.getFranchiseId())
+                            .franchiseId(franchiseId)
                             .build();
                     return branchRepository.save(branch);
                 })

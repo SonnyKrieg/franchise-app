@@ -29,7 +29,7 @@ public class FranchiseCreatorTest {
 
 
     @Test
-    void createNewFranchiseWithDuplicatedName() {
+    void whenCreateNewFranchiseWithDuplicatedNameThenThrowException() {
 
         CreateFranchiseRequest request = FranchiseTestStub.getCreateFranchiseRequest();
 
@@ -44,7 +44,7 @@ public class FranchiseCreatorTest {
     }
 
     @Test
-    void createNewFranchiseWithNoDuplicatedName() {
+    void whenCreateNewFranchiseWithNoDuplicatedNameThenSaveAndReturnDto() {
 
         CreateFranchiseRequest request = FranchiseTestStub.getCreateFranchiseRequest();
 

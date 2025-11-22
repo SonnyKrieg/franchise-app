@@ -4,8 +4,8 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 15s
   r2dbc:
-    username: postgres
-    password: root
+    username: user
+    password: password
     url: r2dbc:postgresql://localhost:5432/franchisedb
     pool:
       max-create-connection-time: 2s

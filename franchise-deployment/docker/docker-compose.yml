@@ -1,28 +1,26 @@
 version: "3.8"
-
 services:
 
-  franchise:
+  fr-app:
     depends_on:
-      - franchise-postgres
-    image: "f"
-    container_name: "franchise-app"
+      - fr-postgres
+    image: "docker.io/sonnykrieg/franchise-app"
+    container_name: "fr-app"
     ports:
       - 8080:8080
-    deploy:
-      restart_policy:
-        condition: on-failure
-    environment:
-      - BPL_JVM_THREAD_COUNT=50
-      - SPRING_R2DBC_URL=r2dbc:postgresql://franchise-postgres:5432/franchisedb
-      - SPRING-FLYWAY-URL=jdbc:postgresql://franchise-postgres:5432/franchisedb
 
-  franchise-postgres:
-    image: "postgres:14.4"
-    container_name: "franchise-postgres"
+    environment:
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8002
+      - SPRING_R2DBC_URL=r2dbc:postgresql://fr-postgres:5432/polardb_order
+      - SPRING_FLYWAY_URL=jdbc:postgresql://fr-postgres:5432/polardb_order
+
+  fr-postgres:
+    image: "postgres:14.12"
+    container_name: "fr-postgres"
     ports:
-      - 5430:5432
+      - 5432:5432
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=franchisedb
+      - POSTGRES_DB=polardb_order

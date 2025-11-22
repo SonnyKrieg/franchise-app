@@ -3,11 +3,15 @@ package com.sonny.franchise_app.franchise.endpoint;
 import com.sonny.franchise_app.branch.dto.BranchDto;
 import com.sonny.franchise_app.franchise.api.AddBranchToFranchiseHelper;
 import com.sonny.franchise_app.franchise.api.FranchiseCreator;
+import com.sonny.franchise_app.franchise.api.FranchiseUpdater;
 import com.sonny.franchise_app.franchise.api.MaxStockProductsProvider;
 import com.sonny.franchise_app.franchise.dto.FranchiseDto;
 import com.sonny.franchise_app.franchise.dto.MaxStockProductDto;
 import com.sonny.franchise_app.franchise.request.AddBranchRequest;
 import com.sonny.franchise_app.franchise.request.CreateFranchiseRequest;
+import com.sonny.franchise_app.franchise.request.UpdateFranchiseNameRequest;
+import com.sonny.franchise_app.product.dto.ProductDto;
+import com.sonny.franchise_app.product.request.UpdateStockRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +31,7 @@ public class FranchiseEndpoint {
     public static final String FRANCHISE_URL = "/api/v1/franchise";
 
     private final FranchiseCreator franchiseCreator;
+    private final FranchiseUpdater franchiseUpdater;
     private final AddBranchToFranchiseHelper branchToFranchiseHelper;
     private final MaxStockProductsProvider maxStockProvider;
 
@@ -80,5 +85,16 @@ public class FranchiseEndpoint {
         return maxStockProvider.get(id)
                 .doOnComplete(() ->
                         log.info("Consulta completada para franquicia {}", id));
+    }
+
+    @PatchMapping("/{id}/name")
+    public Mono<ResponseEntity<FranchiseDto>> updateName(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateFranchiseNameRequest request) {
+
+        log.info("Actualizando el nombre de la franquicia {} a {}", id, request.getName());
+
+        return franchiseUpdater.updateName(id, request)
+                .map(ResponseEntity::ok);
     }
 }

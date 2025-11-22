@@ -38,7 +38,7 @@ public class ProductEndpoint {
             @PathVariable Long id,
             @RequestBody @Valid UpdateStockRequest request) {
 
-        log.info("Actualizando el stock del producto {} a {}", id, request);
+        log.info("Actualizando el stock del producto {} a {}", id, request.getNewStock());
 
         return productUpdater.updateStock(id, request)
                 .map(ResponseEntity::ok);

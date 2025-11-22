@@ -118,7 +118,7 @@ git clone https://github.com/SonnyKrieg/franchise-app
 
 2. Cree el Jar ejecutando:
 ```bash
-./mvnw mvn clean package -DskipTests
+./mvnw clean package -DskipTests
 ```
 3. Ejecute:
 

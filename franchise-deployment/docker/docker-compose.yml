@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+  franchise:
+    depends_on:
+      - franchise-postgres
+    image: "ghcr.io/sonnykrieg/franchise-app:latest"
+    container_name: "franchise-app"
+    ports:
+      - 8080:8080
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - BPL_JVM_THREAD_COUNT=50
+      - SPRING_R2DBC_URL=r2dbc:postgresql://franchise-postgres:5432/franchisedb
+      - SPRING-FLYWAY-URL=jdbc:postgresql://franchise-postgres:5432/franchisedb
+
+  franchise-postgres:
+    image: "postgres:14.4"
+    container_name: "polar-postgres"
+    ports:
+      - 5430:5432
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=franchisedb

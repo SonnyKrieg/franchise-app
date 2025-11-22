@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Plantilla simple para desplegar app Spring Boot con RDS PostgreSQL'
+
+Parameters:
+  DBUsername:
+    Type: String
+    Default: postgres
+    Description: Usuario de la base de datos
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Default: rootpassword123
+    Description: Contraseña de la base de datos
+    MinLength: 8
+
+Resources:
+  # VPC y red básica
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: franchise-vpc
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-2
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: franchise-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: public-rt
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  SubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # Security Groups
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group para la aplicacion Spring Boot
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: app-sg
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group para RDS PostgreSQL
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: db-sg
+
+  # RDS Subnet Group
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group para RDS
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: franchise-db-subnet-group
+
+  # RDS PostgreSQL
+  PostgresDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: franchise-db
+      DBName: franchise_db
+      Engine: postgres
+      EngineVersion: '16.3'
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: '20'
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      DeletionProtection: false
+      Tags:
+        - Key: Name
+          Value: franchise-postgres
+
+  # IAM Role para EC2
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Name
+          Value: franchise-ec2-role
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  # EC2 Instance
+  AppInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: PostgresDB
+    Properties:
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+      InstanceType: t3.small
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: '0'
+          GroupSet:
+            - !Ref AppSecurityGroup
+          SubnetId: !Ref PublicSubnet1
+      UserData:
+  Fn::Base64: !Sub |
+    #!/bin/bash
+    yum update -y
+    yum install -y docker curl
+    systemctl start docker
+    systemctl enable docker
+    usermod -a -G docker ec2-user
+
+    # Crear carpeta para certificados SSL
+    mkdir -p /opt/rds-certs
+
+    curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /opt/rds-certs/global-bundle.pem
+
+    # Asegurar permisos correctos
+    chmod 644 /opt/rds-certs/global-bundle.pem
+
+    # Variables de entorno para R2DBC y Flyway con SSL
+    cat > /etc/environment << EOF
+    SPRING_R2DBC_URL=r2dbc:postgresql://${PostgresDB.Endpoint.Address}:5432/franchise_db?sslMode=verify-full&sslRootCert=/opt/rds-certs/global-bundle.pem
+    SPRING_R2DBC_USERNAME=${DBUsername}
+    SPRING_R2DBC_PASSWORD=${DBPassword}
+    SPRING_FLYWAY_URL=jdbc:postgresql://${PostgresDB.Endpoint.Address}:5432/franchise_db?sslmode=verify-full&sslrootcert=/opt/rds-certs/global-bundle.pem
+    SPRING_FLYWAY_USER=${DBUsername}
+    SPRING_FLYWAY_PASSWORD=${DBPassword}
+    EOF
+
+    # Ejecutar contenedor Docker con volumen del certificado SSL
+    docker run -d \
+      --name franchise-app \
+      --restart unless-stopped \
+      -p 8080:8080 \
+      -v /opt/rds-certs:/opt/rds-certs \
+      -e SPRING_R2DBC_URL=r2dbc:postgresql://${PostgresDB.Endpoint.Address}:5432/franchise_db?sslMode=verify-full&sslRootCert=/opt/rds-certs/global-bundle.pem \
+      -e SPRING_R2DBC_USERNAME=${DBUsername} \
+      -e SPRING_R2DBC_PASSWORD=${DBPassword} \
+      -e SPRING_FLYWAY_URL=jdbc:postgresql://${PostgresDB.Endpoint.Address}:5432/franchise_db?sslmode=verify-full&sslrootcert=/opt/rds-certs/global-bundle.pem \
+      -e SPRING_FLYWAY_USER=${DBUsername} \
+      -e SPRING_FLYWAY_PASSWORD=${DBPassword} \
+      ghcr.io/sonnykrieg/franchise-app:latest
+
+      Tags:
+        - Key: Name
+          Value: franchise-app-instance
+
+Outputs:
+  ApplicationURL:
+    Description: URL de la aplicacion
+    Value: !Sub 'http://${AppInstance.PublicIp}:8080'
+
+  DatabaseEndpoint:
+    Description: Endpoint de la base de datos RDS
+    Value: !GetAtt PostgresDB.Endpoint.Address
+
+  DatabasePort:
+    Description: Puerto de la base de datos
+    Value: !GetAtt PostgresDB.Endpoint.Port

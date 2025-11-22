@@ -24,7 +24,6 @@ La prueba solicita:
     - Programación funcional o reactiva
     - Endpoints para actualizar nombres
     - Infraestructura como código (Terraform / CloudFormation)
-    - Despliegue en nube
 
 ---
 
@@ -39,7 +38,6 @@ La prueba solicita:
 | **PostgreSQL**              | Motor de base de datos   |
 | **Docker & Docker Compose** | Empaquetado              |
 | **CloudFormation**          | Infraestructura como código |
-| **GitFlow**                 | Flujo de trabajo en ramas |
 | **GitHub Actions**          | Flujo de integración continua |
 | **Flyway**                  | Migraciones              |
 | **Java validation**         | Validación de entradas   |
@@ -108,114 +106,32 @@ franchise/
 |   `/product/{product_id}/name`   |  `PATCH`  | `{"name": "Adidas Forum"}` |  200   |   ProductDto      | Actualiza el nombre de producto                         |
 |   `/product/{product_id}/name`   |  `PATCH`  | `{"name": "Adidas Forum"}`|  404   |`{"timestamp":"2025-11-22T03:57:10.898521800Z","status":404,"error":"No se encontro.","messages":["El producto con Id 45 no se encontro."]}`| El producto no se encontro                    |
 
-
-
-
-|                 |          |                   | 422    |                                                                                                                                                       | A book with the same ISBN already exists. |
-| `/books/{isbn}` |  `GET`   |                   | 200    |                                                                         Book                                                                          | Get the book with the given ISBN.         |
-|                 |          |                   | 404    |                                                                                                                                                       | No book with the given ISBN exists.       |
-| `/books/{isbn}` |  `PUT`   |       Book        | 200    |                                                                         Book                                                                          | Update the book with the given ISBN.      |
-|                 |          |                   | 200    |                                                                         Book                                                                          | Create a book with the given ISBN.        |
-| `/books/{isbn}` | `DELETE` |                   | 204    |                                                                                                                                                       | Delete the book with the given ISBN.      |
-
-
-
-## 1. Crear franquicia
-
-`POST /api/franchises`
-
-```json
-{
-  "name": "Franquicia A"
-}
-```
-
----
-
-## 2. Agregar sucursal a una franquicia
-`POST /api/franchises/{id}/branches`
-
-```json
-{
-  "name": "Sucursal Norte"
-}
-```
-
----
-
-## 3. Agregar producto a una sucursal
-`POST /api/branches/{id}/products`
-
-```json
-{
-  "name": "Café",
-  "stock": 50
-}
-```
-
----
-
-## 4. Eliminar producto
-`DELETE /api/products/{id}`
-
----
-
-## 5. Actualizar stock de un producto
-`PUT /api/products/{id}/stock`
-
-```json
-{
-  "stock": 120
-}
-```
-
----
-
-## 6. Producto con mayor stock por sucursal
-`GET /api/franchises/{id}/top-products`
-
-```json
-[
-  {
-    "branch": "Sucursal Norte",
-    "product": {
-      "name": "Café",
-      "stock": 150
-    }
-  }
-]
-```
-
----
-
-# ⭐ Endpoints extra (Plus)
-
-- Actualizar nombre de franquicia
-- Actualizar nombre de sucursal
-- Actualizar nombre de producto
-
----
-
-# 🐳 Ejecutar con Docker
+# Ejecutar local con docker 🐳
 
 Construir imagen:
+
+1. Clone el repositorio:
+
+```bash
+git clone https://github.com/SonnyKrieg/franchise-app
+```
+
+2. Cree el Jar ejecutando:
+```bash
+./mvnw mvn clean package -DskipTests
+```
+3. Ejecute:
 
 ```bash
 docker build -t franchise-app .
 ```
 
-Ejecutar contenedor:
+4. Vaya a la carpeta franchise-deployment/dockere y ejecute:
 
 ```bash
-docker run -p 8080:8080 franchise-app
+docker-compose up 
 ```
-
-Ejecutar con Docker Compose:
-
-```bash
-docker-compose up --build
-```
-
+5. Pruebe la API con localhost:8080
 ---
 
 # 💻 Ejecutar en entorno local
@@ -227,49 +143,18 @@ docker-compose up --build
 - Docker (opcional)
 - Base de datos configurada (según tu implementación)
 
-## 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/<tu-user>/<repo>
-cd <repo>
-```
-
-## 2. Configurar variables de entorno
-
-Ejemplo:
-
-```bash
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_USER=postgres
-export DB_PASSWORD=postgres
-```
-
-## 3. Ejecutar
-
-```bash
-./mvnw spring-boot:run
-```
-
----
-
-# 🧪 Pruebas
-
-```bash
-./mvnw test
-```
-
----
 
 # ☁️ Infraestructura como Código (Plus)
 
-Si la app incluye una plantilla IaC:
+Se creo una plantilla con CloudFormation:
 
-El archivo se encuentra en `/infra` e incluye la provisión de recursos como:
-- Base de datos
-- ECS Fargate / EC2
+El archivo se encuentra en `/franchise/deployment` e incluye la provisión de recursos como:
+- Base de datos (RDS)
+- EC2
 - Redes (VPC, subnets, security groups)
 - Roles IAM
+
+Puede crear un stack en AWS y probarla
 
 ---
 
@@ -278,12 +163,19 @@ El archivo se encuentra en `/infra` e incluye la provisión de recursos como:
 Se utilizó un flujo basado en **GitFlow**:
 
 - `main` – rama estable
-- `develop` – rama para integración
-- `feature/*` – funcionalidades independientes
-- `fix/*` – correcciones
+- `feature/*` – funcionalidades
+- `chore/*` – tareas triviales
 
 ---
 
-# 📄 Licencia
+# Pruebas
 
-MIT – Libre para uso educativo o profesional.
+Todos los casos de uso tienen pruebas unitarias y todos los endpoint se probaron con Postman
+
+# Flujo de integración continua:
+
+Se creo un flujo de integración continua usando GitHub Actions
+para: 
+- Automatizar pruebas y compilación para detectar fallos temprano.
+- Escanear vulnerabilidades tanto en el código fuente como en la imagen de contenedor.
+- Publicar automáticamente una imagen en el registro cuando el código llega a main, facilitando despliegues continuos
